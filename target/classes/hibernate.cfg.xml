@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <property name="connection.driver_class">org.postgresql.Driver</property>
+        <!--
+        <property name="dialect">org.hibernate.dialect.PostgreSQLDialect</property>
+-->
+        <property name="connection.url">jdbc:postgresql://flora.db.elephantsql.com/nlofsmlq</property>
+        <property name="connection.username">nlofsmlq</property>
+        <property name="connection.password">6HaRyTHX-DJMggaejem4_8rQlkMzTJvr</property>
+
+        <property name="show_sql">true</property>
+        <property name="hbm2ddl.auto">validate</property>
+        <property name="hibernate.format_sql">false</property>
+        <property name="hibernate.connection.pool_size">10</property>
+
+        <mapping class="org.example.model.Vehicle"/>
+        <mapping class="org.example.model.Car"/>
+        <!--
+        TODO: add mapping classes User and Motorcycle
+        -->
+
+    </session-factory>
+</hibernate-configuration>
