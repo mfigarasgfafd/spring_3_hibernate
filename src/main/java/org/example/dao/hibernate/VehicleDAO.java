@@ -7,17 +7,29 @@ import org.example.model.Vehicle;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.query.Query;
+
 
 import java.util.Collection;
 
 
 public class VehicleDAO implements IVehicleRepository {
-    SessionFactory sessionFactory;
+    private static VehicleDAO instance;
+    private final SessionFactory sessionFactory;
 
-    public VehicleDAO(SessionFactory sessionFactory) {
+    // Private constructor to prevent instantiation outside of the class
+    private VehicleDAO(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
+
+    // Static method to get the instance of the singleton class
+    public static synchronized VehicleDAO getInstance(SessionFactory sessionFactory) {
+        if (instance == null) {
+            instance = new VehicleDAO(sessionFactory);
+        }
+        return instance;
+    }
+
+
 
     @Override
     public boolean rentVehicle(String plate, String login) {
@@ -59,12 +71,43 @@ public class VehicleDAO implements IVehicleRepository {
         Session session = null;
         Transaction transaction = null;
         boolean success=false;
-        //TODO:Finish this method
+        session = sessionFactory.openSession();
+        try {
+            transaction = session.beginTransaction();
+            session.saveOrUpdate(vehicle);
+            transaction.commit();
+            success = true;
+
+        }catch (RuntimeException e) {
+            if (transaction != null) transaction.rollback();
+            e.printStackTrace();
+        }finally {
+            session.close();
+        }
+
         return success;
     }
     @Override
     public boolean removeVehicle(String plate) {
-        //TODO: Implement removeVehicle method.
+        Session session = null;
+        Transaction transaction = null;
+        try{
+            session = sessionFactory.openSession();
+            transaction = session.beginTransaction();
+            Vehicle vehicle = session.get(Vehicle.class, plate);
+            if (vehicle != null && !vehicle.isRent()) {
+                session.delete(vehicle);
+                transaction.commit();
+                return true;
+            } else {
+                return false;
+            }
+        }catch (Exception e){
+            if (transaction != null) transaction.rollback();
+            e.printStackTrace();
+        }finally {
+            session.close();
+        }
         return false;
     }
 
@@ -79,21 +122,59 @@ public class VehicleDAO implements IVehicleRepository {
         }
     }
 
-    //Must implement old interface. Plate is no longer needed when User has Vehicle.
     public boolean returnVehicle(String plate,String login) {
-        //TODO:Implement returnVehicle method
+        Session session = sessionFactory.openSession();
+        Transaction transaction = null;
+        try{
+            transaction = session.beginTransaction();
+            User user = session.get(User.class, login);
+            Vehicle vehicle = session.get(Vehicle.class, plate);
+
+            if (user != null && vehicle != null && user.getVehicle() == vehicle && vehicle.isRent()) {
+                vehicle.setRent(false);
+                user.setVehicle(null);
+                vehicle.setUser(null);
+
+                session.saveOrUpdate(user);
+                session.saveOrUpdate(vehicle);
+                transaction.commit();
+                return true;
+            }else{
+                if(transaction != null){
+                    transaction.rollback();
+                }
+
+                return false;
+            }
+        }catch (RuntimeException e){
+            if (transaction != null) transaction.rollback();
+            e.printStackTrace();
+        }
+        finally {
+            session.close();
+        }
         return false;
 
     }
 
     @Override
     public Collection<Vehicle> getVehicles() {
+        Collection<Vehicle> vehicles;
         Session session = sessionFactory.openSession();
+        Transaction transaction = null;
         try {
-            //TODO:finish this method
-            return null;
-        } finally {
+            transaction = session.beginTransaction();
+            vehicles = session.createQuery("FROM Vehicle", Vehicle.class).getResultList();
+            transaction.commit();
+            return vehicles;
+        }
+        catch (RuntimeException e){
+            if (transaction != null) transaction.rollback();
+            e.printStackTrace();
+        }
+        finally {
             session.close();
         }
+        return null;
     }
 }

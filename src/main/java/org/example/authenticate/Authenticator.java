@@ -13,8 +13,8 @@ public class Authenticator {
         if ( userFromDb!= null && hashPassword(password).equals(userFromDb.getPassword())) {
             return userFromDb;
         }
-            return null;
-        }
+        return null;
+    }
 
     public static String hashPassword(String password){
         return DigestUtils.sha256Hex(password);

@@ -5,29 +5,18 @@ import org.example.model.User;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-
 import java.util.Collection;
 
 public class UserDAO implements IUserRepository {
     private static UserDAO instance;
     SessionFactory sessionFactory;
-
     @Override
     public User getUser(String login) {
-        Session session = sessionFactory.openSession();
         User user = null;
-        Transaction transaction = null;
-        try {
-            transaction = session.beginTransaction();
-            user = session.createQuery("FROM User WHERE login = :login", User.class)
-                    .setParameter("login", login)
-                    .uniqueResult();
-            transaction.commit();
-        } catch (RuntimeException e) {
-            if (transaction != null) transaction.rollback();
-            throw e;
-        } finally {
-            session.close();
+        try (Session session = sessionFactory.openSession()) {
+            user = session.get(User.class, login);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
         return user;
     }
@@ -57,7 +46,7 @@ public class UserDAO implements IUserRepository {
         try {
             transaction = session.beginTransaction();
             User user = session.get(User.class, login);
-            if (user != null && user.getVehicle() == null) {
+            if (user != null && user.getVehicle()==null) {
                 session.remove(user);
             } else {
                 return;
@@ -92,7 +81,6 @@ public class UserDAO implements IUserRepository {
     private UserDAO(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
-
     public static UserDAO getInstance(SessionFactory sessionFactory) {
         if (instance == null) {
             instance = new UserDAO(sessionFactory);

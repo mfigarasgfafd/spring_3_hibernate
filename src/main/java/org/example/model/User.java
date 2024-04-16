@@ -12,7 +12,8 @@ public class User {
     private Role role;
 
     //private String rentedPlate;
-    //TODO:add OneToOne relation (class Vehicle)
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "rentedPlate", referencedColumnName = "plate")
     private Vehicle vehicle;
 
     public User(String login, String password, Role role, Vehicle vehicle) {
@@ -29,6 +30,7 @@ public class User {
     }
 
     public User() {
+
     }
 
     public String getLogin() {

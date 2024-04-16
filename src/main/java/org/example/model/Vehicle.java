@@ -1,29 +1,24 @@
 package org.example.model;
 
 import jakarta.persistence.*;
-import org.example.BooleanToShortConventer;
-
+import org.example.BooleanToShortConverter;
 @Entity
+@Table(name = "tvehicle")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "vehicle_type", discriminatorType = DiscriminatorType.STRING)
 public abstract class Vehicle {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // Nowe ID field
-
     private String brand;
     private String model;
     private int year;
-    @Column(columnDefinition = "numeric") // Mapowanie pola price na wartość numeryczną
+    @Column(columnDefinition = "numeric")
     private double price;
-    @Column(unique = true) // Ustawienie pola plate jako unique
+    @Id
     private String plate;
-
-    @Convert(converter = BooleanToShortConventer.class) // Dodanie konwertera dla pola rent
+    @Convert(converter = BooleanToShortConverter.class)
     private boolean rent;
-
     @OneToOne(mappedBy = "vehicle", fetch = FetchType.EAGER)
     private User user;
+
     public Vehicle(String brand, String model, int year, double price, String plate) {
         this.brand = brand;
         this.model = model;

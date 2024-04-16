@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 @DiscriminatorValue("MOTORCYCLE")
 public class Motorcycle extends Vehicle {
 
+
     String category;
 
     public Motorcycle(String brand, String model, int year, double price, String plate,String category) {
